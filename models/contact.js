@@ -1,21 +1,33 @@
 const {Schema, model} = require('mongoose')
 const Joi = require('joi')
 
+const codeName =
+	/([A-Z]{1}[a-z]{1,30}[- ]{0,1}|[A-Z]{1}[- \\']{1}[A-Z]{0,1}[a-z]{1,30}[- ]{0,1}|[a-z]{1,2}[ -\\']{1}[A-Z]{1}[a-z]{1,30}){2,5}/
+
+const codeEmail =
+	/^([a-z0-9_-]+\.)*[a-z0-9_-]+@[a-z0-9_-]+(\.[a-z0-9_-]+)*\.[a-z]{2,6}$/
+
+const codePhone = /^\([0-9]{3}\) [0-9]{3}-[0-9]{2}-[0-9]{2}/
+
 const contactSchema = Schema(
 	{
 		name: {
 			type: String,
-			required: [true, 'Set name for contact'],
 			minlength: 2,
+			match: codeName,
+			required: [true, 'Set name for contact'],
 		},
 		email: {
 			type: String,
+			match: codeEmail,
 			require: true,
+			unique: true,
 		},
 		phone: {
 			type: String,
 			required: true,
-			match: /^\([0-9]{3}\) [0-9]{3}-[0-9]{2}-[0-9]{2}/,
+			match: codePhone,
+			unique: true,
 		},
 		favorite: {
 			type: Boolean,
@@ -28,9 +40,9 @@ const contactSchema = Schema(
 const Contact = model('contact', contactSchema)
 
 const joiSchemaContact = Joi.object({
-	name: Joi.string().required(),
-	email: Joi.string().required(),
-	phone: Joi.string().required(),
+	name: Joi.string().min(2).pattern(codeName).required(),
+	email: Joi.string().pattern(codeEmail).required(),
+	phone: Joi.string().pattern(codePhone).required(),
 	favorite: Joi.boolean(),
 })
 

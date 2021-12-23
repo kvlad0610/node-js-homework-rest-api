@@ -40,7 +40,10 @@ router.post('/', async (req, res, next) => {
 		const newContact = await Contact.create(req.body)
 		res.status(201).json(newContact)
 	} catch (error) {
-		if (error.message.includes('contact validation')) {
+		if (
+			error.message.includes('contact validation') ||
+			error.message.includes('E11000 duplicate key')
+		) {
 			error.status = 400
 		}
 		next(error)
@@ -63,24 +66,52 @@ router.delete('/:contactId', async (req, res, next) => {
 	}
 })
 
-// router.put('/:contactId', async (req, res, next) => {
-// 	try {
-// 		const {error} = joiSchemaContact.validate(req.body)
-// 		if (error) {
-// 			throw new BadRequest('missing fields')
-// 		}
-// 		const {contactId} = req.params
-// 		const updateContact = await contactsOperations.updateContact(
-// 			contactId,
-// 			req.body
-// 		)
-// 		if (!updateContact) {
-// 			throw new NotFound()
-// 		}
-// 		res.json(updateContact)
-// 	} catch (error) {
-// 		next(error)
-// 	}
-// })
+router.put('/:contactId', async (req, res, next) => {
+	try {
+		// const {error} = joiSchemaContact.validate(req.body)
+		// if (error) {
+		// 	throw new BadRequest('missing fields')
+		// }
+		const {contactId} = req.params
+		const updateContact = await Contact.findByIdAndUpdate(contactId, req.body, {
+			new: true,
+		})
+		if (!updateContact) {
+			throw new NotFound()
+		}
+		res.json(updateContact)
+	} catch (error) {
+		if (error.message.includes('Cast to ObjectId failed')) {
+			error.status = 404
+		}
+		next(error)
+	}
+})
+
+router.patch('/:contactId/favorite', async (req, res, next) => {
+	try {
+		const {contactId} = req.params
+		const {favorite} = req.body
+		if (!favorite) {
+			throw new BadRequest('missing field favorite')
+		}
+		const updateContact = await Contact.findByIdAndUpdate(
+			contactId,
+			{favorite},
+			{
+				new: true,
+			}
+		)
+		if (!updateContact) {
+			throw new NotFound()
+		}
+		res.json(updateContact)
+	} catch (error) {
+		if (error.message.includes('Cast to ObjectId failed')) {
+			error.status = 404
+		}
+		next(error)
+	}
+})
 
 module.exports = router
