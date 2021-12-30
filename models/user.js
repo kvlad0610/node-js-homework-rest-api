@@ -35,12 +35,12 @@ const User = model('user', userSchema)
 const joiSchemaUser = Joi.object({
 	password: Joi.string().min(6).required(),
 	email: Joi.string().pattern(codeEmail).required(),
-	subscription: Joi.string().valueOf('starter', 'pro', 'business'),
+	subscription: Joi.string().valid('starter', 'pro', 'business'),
 	token: Joi.string(),
 })
 
 const joiSchemaUserSubscription = Joi.object({
-	subscription: Joi.string().valueOf('starter', 'pro', 'business').required(),
+	subscription: Joi.string().valid('starter', 'pro', 'business').required(),
 })
 
 module.exports = {

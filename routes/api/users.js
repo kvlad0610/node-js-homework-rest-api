@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 
 const {User} = require('../../models')
-const {joiSchemaUser} = require('../../models/user')
+const {joiSchemaUser, joiSchemaUserSubscription} = require('../../models/user')
 
 const {authenticate} = require('../../middleware')
 
@@ -87,19 +87,12 @@ router.get('/current', authenticate, async (req, res) => {
 
 router.patch('/', authenticate, async (req, res, next) => {
 	try {
-		// const {error} = joiSchemaUserSubscription.validate(req.body)
-		// if (error) {
-		// 	throw new BadRequest(error.message)
-		// }
+		const {error} = joiSchemaUserSubscription.validate(req.body)
+		if (error) {
+			throw new BadRequest(error.message)
+		}
 		const {_id} = req.user
 		const {subscription} = req.body
-		if (
-			subscription !== 'starter' &&
-			subscription !== 'pro' &&
-			subscription !== 'business'
-		) {
-			throw new BadRequest('one of ( starter, pro, business )')
-		}
 		if (!subscription) {
 			throw new BadRequest('missing field subscription')
 		}
