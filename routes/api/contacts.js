@@ -44,20 +44,22 @@ router.get('/:contactId', authenticate, async (req, res, next) => {
 		const {contactId} = req.params
 		const {_id} = req.user
 
-		const contact = await Contact.findById(contactId)
+		const contact = await Contact.findOne({_id: contactId, owner: _id})
+
+		// const contact = await Contact.findById(contactId)
 		if (!contact) {
 			throw new NotFound()
 		}
 
-		const userId = _id.toString()
-		if (!contact.owner) {
-			res.json(contact)
-		}
-		const ownerId = contact.owner.toString()
+		// const userId = _id.toString()
+		// if (!contact.owner) {
+		// 	res.json(contact)
+		// }
+		// const ownerId = contact.owner.toString()
 
-		if (ownerId !== userId) {
-			throw new Unauthorized('No access')
-		}
+		// if (ownerId !== userId) {
+		// 	throw new Unauthorized('No access')
+		// }
 		res.json(contact)
 	} catch (error) {
 		if (error.message.includes('Cast to ObjectId failed')) {
@@ -92,21 +94,23 @@ router.delete('/:contactId', authenticate, async (req, res, next) => {
 		const {contactId} = req.params
 		const {_id} = req.user
 
-		const contact = await Contact.findById(contactId)
+		const contact = await Contact.findOneAndDelete({_id: contactId, owner: _id})
+		console.log(contact)
+		// const contact = await Contact.findById(contactId)
 		if (!contact) {
 			throw new NotFound()
 		}
-		const userId = _id.toString()
-		if (!contact.owner) {
-			await Contact.findByIdAndRemove(contactId)
-			res.json({message: 'product delete'})
-		}
-		const ownerId = contact.owner.toString()
+		// const userId = _id.toString()
+		// if (!contact.owner) {
+		// 	await Contact.findByIdAndRemove(contactId)
+		// 	res.json({message: 'product delete'})
+		// }
+		// const ownerId = contact.owner.toString()
 
-		if (ownerId !== userId) {
-			throw new Unauthorized('No access')
-		}
-		await Contact.findByIdAndRemove(contactId)
+		// if (ownerId !== userId) {
+		// 	throw new Unauthorized('No access')
+		// }
+		// await Contact.findByIdAndRemove(contactId)
 		// if (!deleteContact) {
 		// 	throw new NotFound()
 		// }
@@ -127,34 +131,38 @@ router.put('/:contactId', authenticate, async (req, res, next) => {
 		// }
 		const {contactId} = req.params
 		const {_id} = req.user
-
-		const contact = await Contact.findById(contactId)
+		const contact = await Contact.findOneAndUpdate(
+			{_id: contactId, owner: _id},
+			req.body,
+			{new: true}
+		)
+		// const contact = await Contact.findById(contactId)
 		if (!contact) {
 			throw new NotFound()
 		}
-		const userId = _id.toString()
-		if (!contact.owner) {
-			const updateContact = await Contact.findByIdAndUpdate(
-				contactId,
-				req.body,
-				{
-					new: true,
-				}
-			)
-			res.json(updateContact)
-		}
-		const ownerId = contact.owner.toString()
+		// const userId = _id.toString()
+		// if (!contact.owner) {
+		// 	const updateContact = await Contact.findByIdAndUpdate(
+		// 		contactId,
+		// 		req.body,
+		// 		{
+		// 			new: true,
+		// 		}
+		// 	)
+		// 	res.json(updateContact)
+		// }
+		// const ownerId = contact.owner.toString()
 
-		if (ownerId !== userId) {
-			throw new Unauthorized('No access')
-		}
-		const updateContact = await Contact.findByIdAndUpdate(contactId, req.body, {
-			new: true,
-		})
+		// if (ownerId !== userId) {
+		// 	throw new Unauthorized('No access')
+		// }
+		// const updateContact = await Contact.findByIdAndUpdate(contactId, req.body, {
+		// 	new: true,
+		// })
 		// if (!updateContact) {
 		// 	throw new NotFound()
 		// }
-		res.json(updateContact)
+		res.json(contact)
 	} catch (error) {
 		if (error.message.includes('Cast to ObjectId failed')) {
 			error.status = 404
