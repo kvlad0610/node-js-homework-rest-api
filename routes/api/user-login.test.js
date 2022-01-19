@@ -17,7 +17,9 @@ describe('test user-login', () => {
 
 	afterEach((done) => {
 		mongoose.connection.db.dropCollection('users').then(() => {
-			mongoose.connection.close(() => done())
+			mongoose.connection.db.dropCollection('contacts').then(() => {
+				mongoose.connection.close(() => done())
+			})
 		})
 	})
 
